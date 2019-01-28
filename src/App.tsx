@@ -1,25 +1,34 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import { Chart } from "./MarketDepth";
+import createDataFeed, { IOrderBook } from "./DataFeed";
 
-class App extends Component {
-  render() {
+import { filter, sampleTime, share, map } from "rxjs/operators";
+
+class App extends Component<{}, { Symbol: string }> {
+  inputRef: React.RefObject<HTMLInputElement> = React.createRef();
+
+  constructor(props: {}) {
+    super(props);
+    this.state = { Symbol: "ETH-BTC" };
+  }
+
+  showMarket = () => {
+    if (
+      this.inputRef &&
+      this.inputRef.current &&
+      this.inputRef.current.value != null
+    ) {
+      this.setState({ Symbol: this.inputRef.current.value });
+      this.inputRef.current.value = "";
+    }
+  };
+
+  public render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div>
+        <input ref={this.inputRef} />{" "}
+        <button onClick={this.showMarket}>Show</button>
+        <Chart Symbol={this.state.Symbol} />
       </div>
     );
   }

@@ -1,0 +1,50 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: market-depth
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: market-depth
+  template:
+    metadata:
+      name: market-depth
+      labels:
+        app: market-depth
+    spec:
+      containers:
+        - name: name
+          image: hub.cgblockchain.com/trading-zoo/market-depth:latest
+          ports:
+            - containerPort: 80
+              name: http
+      imagePullSecrets:
+        - name: cgblockchainkey
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: market-depth
+spec:
+  selector:
+    app: market-depth
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: market-depth
+spec:
+  rules:
+    - host: market.qa.bct.tools
+      http:
+        paths:
+          - backend:
+              serviceName: market-depth
+              servicePort: 80
+            path: /
