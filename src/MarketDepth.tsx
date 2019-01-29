@@ -83,6 +83,16 @@ interface IChartProps {
   Symbol: string;
 }
 
+function* getDepth(
+  positions: Array<[number, number, string]>
+): IterableIterator<[number, number]> {
+  let sum = 0;
+  for (var p of positions) {
+    sum += p[1];
+    yield [p[0], sum];
+  }
+}
+
 export class Chart extends React.Component<IChartProps, IOrderBook> {
   constructor(props: IChartProps) {
     super(props);
@@ -113,16 +123,21 @@ export class Chart extends React.Component<IChartProps, IOrderBook> {
   }
 
   public render() {
-    const asks = this.state.Asks.map(([a, p]) => [a, p]);
-    const bids = this.state.Bids.map(([a, p]) => [a, p]);
+    // const asks = this.state.Asks.map(([a, p]) => [a, p]);
+    // const bids = this.state.Bids.map(([a, p]) => [a, p]);
+
+    const asksDepth = Array.from(getDepth(this.state.Asks));
+    const bidsDepth = Array.from(getDepth(this.state.Bids.reverse())).reverse();
 
     const defaultOptions = chartOptions(this.state.Symbol);
 
     const options = {
       ...defaultOptions,
       series: [
-        { data: asks, name: "asks", color: "#fc5857" },
-        { data: bids, name: "bids", color: "#03a7a8" },
+        { data: asksDepth, name: "asks", color: "#fc5857" },
+        //{ data: asksDepth, name: "asks-1", color: "#fc5857" },
+        { data: bidsDepth, name: "bids", color: "#03a7a8" },
+        //{ data: bidsDepth, name: "bids-1", color: "#03a7a8" },
       ],
     };
 

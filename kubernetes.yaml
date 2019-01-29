@@ -16,6 +16,7 @@ spec:
       containers:
         - name: name
           image: hub.cgblockchain.com/trading-zoo/market-depth:latest
+            imagePullPolicy: Always
           ports:
             - containerPort: 80
               name: http
