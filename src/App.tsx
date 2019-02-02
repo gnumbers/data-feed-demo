@@ -1,10 +1,9 @@
 import React, { Component } from "react";
 import { Chart } from "./MarketDepth";
-import createDataFeed, { IOrderBook } from "./DataFeed";
+import { BrowserRouter as Router, Link, Route } from "react-router-dom";
+import Portfolio from "./Portfolio";
 
-import { filter, sampleTime, share, map } from "rxjs/operators";
-
-class App extends Component<{}, { Symbol: string }> {
+class MarketSize extends Component<{}, { Symbol: string }> {
   inputRef: React.RefObject<HTMLInputElement> = React.createRef();
 
   constructor(props: {}) {
@@ -33,5 +32,17 @@ class App extends Component<{}, { Symbol: string }> {
     );
   }
 }
+
+const App = () => (
+  <Router>
+    <div>
+      <Link to="/">Market size</Link>
+      <br />
+      <Link to="/portfolio">Portfolio</Link>
+      <Route exact={true} path="/" component={MarketSize} />
+      <Route path="/portfolio" component={Portfolio} />
+    </div>
+  </Router>
+);
 
 export default App;

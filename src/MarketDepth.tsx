@@ -96,7 +96,7 @@ function* getDepth(
 export class Chart extends React.Component<IChartProps, IOrderBook> {
   constructor(props: IChartProps) {
     super(props);
-    this.state = { Asks: [], Bids: [], Symbol: "" };
+    this.state = { Asks: [], Bids: [], Symbol: "", MidPrice: 0 };
   }
 
   private subscription?: Subscription;
