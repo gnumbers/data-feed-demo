@@ -6,6 +6,31 @@ import HighchartsReact from "highcharts-react-official";
 import createDataFeed, { IOrderBook } from "./DataFeed";
 import { Subscription, Observable } from "rxjs";
 
+const OrderBookSide: React.FunctionComponent<{
+  color: string;
+  positions: Array<[number, number, string]>;
+  size: number;
+  reverse: boolean;
+}> = props => {
+  const items = props.reverse
+    ? props.positions.slice(0, props.size).reverse()
+    : props.positions.slice(0, props.size);
+
+  return (
+    <table style={{ color: props.color }}>
+      <tbody>
+        {items.map(([price, amount, exchanges]) => (
+          <tr key={price}>
+            <td>{price}</td>
+            <td>{amount}</td>
+            <td>{exchanges}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+};
+
 const chartOptions = (title: string) => {
   return {
     chart: {
@@ -141,6 +166,28 @@ export class Chart extends React.Component<IChartProps, IOrderBook> {
       ],
     };
 
-    return <HighchartsReact highcharts={Highcharts} options={options} />;
+    return (
+      <div>
+        <div>
+          <HighchartsReact highcharts={Highcharts} options={options} />
+        </div>
+        <div>
+          <OrderBookSide
+            color="red"
+            positions={this.state.Asks}
+            size={10}
+            reverse={true}
+          />
+        </div>
+        <div>
+          <OrderBookSide
+            color="green"
+            positions={this.state.Bids}
+            size={10}
+            reverse={false}
+          />
+        </div>
+      </div>
+    );
   }
 }

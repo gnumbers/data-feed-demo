@@ -8,7 +8,7 @@ class MarketSize extends Component<{}, { Symbol: string }> {
 
   constructor(props: {}) {
     super(props);
-    this.state = { Symbol: "ETH-BTC" };
+    this.state = { Symbol: "BTC-USDT" };
   }
 
   showMarket = () => {
