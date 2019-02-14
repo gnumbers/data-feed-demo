@@ -3,33 +3,9 @@
 import React from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import createDataFeed, { IOrderBook } from "./DataFeed";
+import { IOrderBook } from "../DataFeed";
 import { Subscription, Observable } from "rxjs";
-
-const OrderBookSide: React.FunctionComponent<{
-  color: string;
-  positions: Array<[number, number, string]>;
-  size: number;
-  reverse: boolean;
-}> = props => {
-  const items = props.reverse
-    ? props.positions.slice(0, props.size).reverse()
-    : props.positions.slice(0, props.size);
-
-  return (
-    <table style={{ color: props.color }}>
-      <tbody>
-        {items.map(([price, amount, exchanges]) => (
-          <tr key={price}>
-            <td>{price}</td>
-            <td>{amount}</td>
-            <td>{exchanges}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-};
+import { sampleTime } from "rxjs/operators";
 
 const chartOptions = (title: string) => {
   return {
@@ -104,43 +80,46 @@ const chartOptions = (title: string) => {
   };
 };
 
-interface IChartProps {
-  Symbol: string;
+interface ChartProps {
+  Stream: Observable<IOrderBook>;
+  Throttle?: number;
 }
 
 function* getDepth(
   positions: Array<[number, number, string]>
 ): IterableIterator<[number, number]> {
   let sum = 0;
-  for (var p of positions) {
+  for (const p of positions) {
     sum += p[1];
     yield [p[0], sum];
   }
 }
 
-export class Chart extends React.Component<IChartProps, IOrderBook> {
-  constructor(props: IChartProps) {
+export class Chart extends React.Component<ChartProps, IOrderBook> {
+  constructor(props: ChartProps) {
     super(props);
     this.state = { Asks: [], Bids: [], Symbol: "", MidPrice: 0 };
   }
 
   private subscription?: Subscription;
 
+  private initializeComponent = () => {
+    if (this.subscription) this.subscription.unsubscribe();
+
+    const stream = this.props.Throttle
+      ? this.props.Stream.pipe(sampleTime(this.props.Throttle))
+      : this.props.Stream;
+
+    this.subscription = stream.subscribe((d: IOrderBook) => this.setState(d));
+  };
+
   public componentDidMount() {
-    this.subscription = createDataFeed(this.props.Symbol).subscribe(
-      (d: IOrderBook) => this.setState(d)
-    );
+    this.initializeComponent();
   }
 
-  public UNSAFE_componentWillReceiveProps(newProps: IChartProps) {
-    if (this.props.Symbol != newProps.Symbol) {
-      if (this.subscription) {
-        this.subscription.unsubscribe();
-        this.subscription = createDataFeed(newProps.Symbol).subscribe(
-          (d: IOrderBook) => this.setState(d)
-        );
-      }
-    }
+  public componentDidUpdate(prevProps: ChartProps) {
+    if (prevProps.Stream === this.props.Stream) return;
+    this.initializeComponent();
   }
 
   public componentWillUnmount() {
@@ -171,23 +150,9 @@ export class Chart extends React.Component<IChartProps, IOrderBook> {
         <div>
           <HighchartsReact highcharts={Highcharts} options={options} />
         </div>
-        <div>
-          <OrderBookSide
-            color="red"
-            positions={this.state.Asks}
-            size={10}
-            reverse={true}
-          />
-        </div>
-        <div>
-          <OrderBookSide
-            color="green"
-            positions={this.state.Bids}
-            size={10}
-            reverse={false}
-          />
-        </div>
       </div>
     );
   }
 }
+
+export default Chart;

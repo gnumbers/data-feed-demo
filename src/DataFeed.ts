@@ -39,9 +39,6 @@ const createDataFeed = (symbol: string): Observable<IOrderBook> =>
     return () => {
       sc.destroy(client);
     };
-  }).pipe(
-    sampleTime(500),
-    map((x: IOrderBook) => sort(x))
-  );
+  }).pipe(map((x: IOrderBook) => sort(x)));
 
 export default createDataFeed;
