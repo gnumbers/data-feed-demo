@@ -3,6 +3,8 @@ import { Chart } from "./Market/MarketDepth";
 import { BrowserRouter as Router, Link, Route } from "react-router-dom";
 import Portfolio from "./Portfolio";
 import CurrencySelector from "./Market/CurrencySelector";
+import BreakDown from "./Market/BreakDown";
+import Sandbox from "./Market/Sandbox";
 
 // class MarketSize extends Component<{}, { Symbol: string }> {
 //   inputRef: React.RefObject<HTMLInputElement> = React.createRef();
@@ -40,8 +42,15 @@ const App = () => (
       <Link to="/market/BTC-USDT">Market size</Link>
       <br />
       <Link to="/portfolio">Portfolio</Link>
+      <br />
+      <Link to="/breakdown/BTC-USDT">Breakdown</Link>
+      <br />
+      <Link to="/sand-box/BTC-USDT">Sandbox</Link>
+      <br />
       <Route path="/market/:symbol" component={CurrencySelector} />
       <Route path="/portfolio" component={Portfolio} />
+      <Route path="/breakdown/:symbol" component={BreakDown} />
+      <Route path="/sand-box/:symbol" component={Sandbox} />
     </div>
   </Router>
 );

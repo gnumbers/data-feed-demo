@@ -15,16 +15,16 @@ const sort = (ob: IOrderBook): IOrderBook => {
     Asks: ob.Asks.sort(([p1, a1, e1], [p2, a2, e2]) => p1 - p2),
     Bids: ob.Bids.sort(([p1, a1, e1], [p2, a2, e2]) => p1 - p2),
     Symbol: ob.Symbol,
-    ...ob,
+    ...ob
   };
 };
 
 const createDataFeed = (symbol: string): Observable<IOrderBook> =>
   Observable.create((obs: Observer<IOrderBook>) => {
     const client = sc.create({
-      host: "ws-market.qa.bct.trade:443",
+      host: "ws-debug.bct.trade:443",
       secure: true,
-      autoReconnect: true,
+      autoReconnect: true
     });
 
     client.on("orderBook", (data: IOrderBook) => {

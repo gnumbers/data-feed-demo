@@ -22,11 +22,11 @@ function truncate(orderBook: IOrderBook, depth: number): IOrderBook {
     Symbol: orderBook.Symbol,
     MidPrice: orderBook.MidPrice,
     Asks: asks,
-    Bids: bids,
+    Bids: bids
   };
 }
 
-const OrderBookSide: React.FunctionComponent<{
+export const OrderBookSide: React.FunctionComponent<{
   positions: [number, number, string][];
   color: string;
 }> = ({ positions, color }) => {
