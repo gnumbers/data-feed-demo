@@ -1,15 +1,22 @@
 import { getConnection } from "./ws-connection";
-import { switchMap, filter, map, tap, retry } from "rxjs/operators";
+import { switchMap, filter, map, tap, retry, finalize } from "rxjs/operators";
 import { never } from "rxjs";
 
-const changeBehavior = (cmd, kind) => connection => {
+const changeBehavior = (cmd, kind, unsubscribe) => connection => {
   if (!connection) return never();
 
   connection.ws.send(JSON.stringify(cmd));
 
   return connection.messages.pipe(
     filter(x => x.event === kind),
-    map(x => x.data)
+    map(x => x.data),
+    finalize(() => {
+      try {
+        connection.ws.send(JSON.stringify(unsubscribe));
+      } catch (err) {
+        console.warn(err);
+      }
+    })
   );
 };
 
@@ -22,7 +29,8 @@ export const getBreakdowns = ({ symbol, levels, throttleMs, exchanges }) => {
         {
           breakdownRequest: { symbols: [symbol], levels, throttleMs, exchanges }
         },
-        "breakdown"
+        "breakdown",
+        { breakdownUnsubscribe: {} }
       )
     ),
     tap(null, console.warn),
@@ -51,7 +59,8 @@ export const getChart = ({
             exchanges
           }
         },
-        "orderBook"
+        "orderBook",
+        { marketDataUnsubscribe: {} }
       )
     ),
     tap(null, console.warn),
