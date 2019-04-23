@@ -12,27 +12,26 @@ const createConnection = url => {
   return Observable.create(obs => {
     const ws = new WebSocket(url);
 
-    ws.addEventListener("close", () => {
+    ws.onerror = err => obs.error(err);
+
+    ws.onclose = () => {
       obs.next(null);
       obs.complete();
-    });
+    };
 
     const messages = Observable.create(obsM => {
-      const handler = m => obsM.next(JSON.parse(m.data));
-
-      ws.addEventListener("message", handler);
-      return () => {
-        ws.removeEventListener("message", handler);
-      };
+      ws.onmessage = m => obsM.next(JSON.parse(m.data));
     }).pipe(
+      tap(null, err => console.warn(err)),
+      retry(),
       publish(),
       refCount()
     );
 
-    ws.addEventListener("open", () => obs.next({ ws, messages }));
+    ws.onopen = () => obs.next({ ws, messages });
 
     return () => {
-      ws.close();
+      if (ws.close) ws.close();
     };
   }).pipe(
     tap(null, console.warn),

@@ -22,12 +22,10 @@ export default class extends React.Component<MyProps, MyState> {
   private initializeSubscription() {
     if (this.subscription) this.subscription.unsubscribe();
 
-    this.subscription = getChart({
-      symbol: "BTC-USDT",
-      levels: 300,
-      throttleMs: 500,
-      min: null,
-      max: null,
+    this.subscription = getBreakdowns({
+      symbol: this.props.match.params.symbol,
+      levels: 5,
+      throttleMs: 100,
       exchanges: []
     })
       .pipe(map((x, ind) => ({ content: x, tick: ind })))
@@ -37,10 +35,12 @@ export default class extends React.Component<MyProps, MyState> {
 
     if (this.subscription)
       this.subscription.add(
-        getBreakdowns({
-          symbol: "BTC-USDT",
-          levels: 20,
-          throttleMs: 100,
+        getChart({
+          symbol: this.props.match.params.symbol,
+          levels: 300,
+          throttleMs: 500,
+          min: null,
+          max: null,
           exchanges: []
         }).subscribe()
       );
@@ -65,7 +65,8 @@ export default class extends React.Component<MyProps, MyState> {
       <div>
         <h1>Sandbox for {this.props.match.params.symbol}</h1>
         <div>Tick: {this.state.tick}</div>
-        <pre>OrderBook: {JSON.stringify(this.state.content)}</pre>
+
+        <pre>{JSON.stringify(this.state.content, null, 2)}</pre>
       </div>
     );
   };
