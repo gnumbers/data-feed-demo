@@ -5,6 +5,7 @@ import { never } from "rxjs";
 const changeBehavior = (cmd, kind, unsubscribe) => connection => {
   if (!connection) return never();
 
+  console.log(cmd);
   connection.ws.send(JSON.stringify(cmd));
 
   return connection.messages.pipe(
@@ -20,7 +21,7 @@ const changeBehavior = (cmd, kind, unsubscribe) => connection => {
   );
 };
 
-const url = "wss://market-data.bct.trade:443/ws";
+const url = "wss://market-data.bct.trade/ws";
 
 export const getBreakdowns = ({ symbol, levels, throttleMs, exchanges }) => {
   return getConnection(url).pipe(
@@ -37,6 +38,22 @@ export const getBreakdowns = ({ symbol, levels, throttleMs, exchanges }) => {
     retry()
   );
 };
+
+export const getDonuts = ({ symbol, amount, side, throttleMs }) => {
+  return getConnection(url).pipe(
+    switchMap(
+      changeBehavior(
+        {
+          donutSubscribe: { market: symbol, amount, side, throttleMs }
+        },
+        "donut",
+        { donutUnsubscribe: {} }
+      )
+    ),
+    tap(null, console.warn),
+    retry()
+  );
+}
 
 export const getChart = ({
   symbol,
